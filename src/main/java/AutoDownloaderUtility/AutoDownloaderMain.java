@@ -18,18 +18,19 @@ public class AutoDownloaderMain {
 		String currentSong;
 		String currentArtistResult;
 		String currentSongResult;
+		String songUrl;
 		int index = 1;
 		ArrayList<String> searchResults = new ArrayList<String>();
 		String songListDirectory = "C:\\Users\\Will\\workspace\\AutoMp3Downloader\\src\\main\\resources\\SongsToDownload.txt";
 		HashMap<String, String> songs = getSongList(songListDirectory);
 
 		SeleniumWebDriver.setUp();
-		SeleniumWebDriver.goToUrl("https://www.soundcloud.com");
 
 		for (Entry<String, String> entry : songs.entrySet()) {
 			currentArtist = entry.getKey();
 			currentSong = entry.getValue();
 
+			SeleniumWebDriver.goToUrl("https://www.soundcloud.com");
 			SeleniumUtil.type(ObjectRepo.soundCloud_LandingPageSearchBar, currentArtist + " " + currentSong);
 			wait(1);
 			SeleniumUtil.click(ObjectRepo.soundCloud_LandingPageSearchButton);
@@ -44,14 +45,29 @@ public class AutoDownloaderMain {
 				System.out.println("All results grabbed.");
 			}
 
+			index = 1;
+
 			for (String i : searchResults) {
-				currentArtistResult = i.split("/n")[0];
-				currentSongResult = i.split("/n")[1];
+				currentArtistResult = i.split("\n")[0];
+				currentSongResult = i.split("\n")[1];
 				if (currentArtistResult.equalsIgnoreCase(currentArtist)
 						&& currentSongResult.equalsIgnoreCase(currentSong)) {
-					System.out.println("got here");
+					SeleniumUtil.click(ObjectRepo.getSongLink(index));
+					break;
 				}
+				index++;
 			}
+
+			songUrl = SeleniumWebDriver.getCurrentUrl();
+
+			SeleniumWebDriver.goToUrl("https://www.klickaud.com");
+			wait(1);
+			SeleniumUtil.type(ObjectRepo.klickAud_SearchBar, songUrl);
+			wait(1);
+			SeleniumUtil.click(ObjectRepo.klickAud_SubmitButton);
+			wait(5);
+			SeleniumUtil.click(ObjectRepo.klickAud_DownloadButton);
+			wait(3);
 		}
 	}
 
