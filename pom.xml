@@ -7,6 +7,13 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>Selenium</groupId>
+			<artifactId>Selenium</artifactId>
+			<version>1.0</version>
+			<scope>system</scope>
+			<systemPath>C:\Users\Will\workspace\Selenium\target\Selenium-0.0.1-SNAPSHOT-jar-with-dependencies.jar</systemPath>
+		</dependency>
+		<dependency>
 			<groupId>com.aventstack</groupId>
 			<artifactId>extentreports</artifactId>
 			<version>3.0.0</version>
@@ -46,13 +53,6 @@
 			<artifactId>jsoup</artifactId>
 			<version>1.11.3</version>
 		</dependency>
-		<dependency>
-			<groupId>Selenium</groupId>
-			<artifactId>Selenium</artifactId>
-			<version>1.0</version>
-			<scope>system</scope>
-			<systemPath>C:\Users\Will\workspace\Selenium\target\Selenium-0.0.1-SNAPSHOT-jar-with-dependencies.jar</systemPath>
-		</dependency>
 	</dependencies>
-	
+
 </project>

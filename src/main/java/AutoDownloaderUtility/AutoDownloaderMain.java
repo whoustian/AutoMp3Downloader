@@ -27,17 +27,15 @@ public class AutoDownloaderMain {
 		SeleniumWebDriver.setUp();
 
 		for (Entry<String, String> entry : songs.entrySet()) {
+			searchResults.clear();
 			currentArtist = entry.getKey();
 			currentSong = entry.getValue();
 
 			SeleniumWebDriver.goToUrl("https://www.soundcloud.com");
-			SeleniumUtil.type(ObjectRepo.soundCloud_LandingPageSearchBar, currentArtist + " " + currentSong);
-			wait(1);
-			SeleniumUtil.click(ObjectRepo.soundCloud_LandingPageSearchButton);
-			wait(1);
+			searchOnSoundcloud(currentArtist, currentSong);
 
 			try {
-				while (index < 20) {
+				while (index < 10) {
 					searchResults.add(SeleniumUtil.getText(ObjectRepo.getArtistSongResults(index)));
 					index++;
 				}
@@ -58,17 +56,30 @@ public class AutoDownloaderMain {
 				index++;
 			}
 
+			SeleniumUtil.waitForElementVisible(ObjectRepo.soundCloud_FollowButton, 5);
 			songUrl = SeleniumWebDriver.getCurrentUrl();
 
 			SeleniumWebDriver.goToUrl("https://www.klickaud.com");
-			wait(1);
-			SeleniumUtil.type(ObjectRepo.klickAud_SearchBar, songUrl);
-			wait(1);
-			SeleniumUtil.click(ObjectRepo.klickAud_SubmitButton);
-			wait(5);
-			SeleniumUtil.click(ObjectRepo.klickAud_DownloadButton);
-			wait(3);
+			downloadSong(songUrl);
 		}
+
+		SeleniumWebDriver.closeBrowser();
+	}
+
+	private static void downloadSong(String songUrl) {
+		SeleniumUtil.waitForElementVisible(ObjectRepo.klickAud_SearchBar, 5);
+		SeleniumUtil.type(ObjectRepo.klickAud_SearchBar, songUrl);
+		SeleniumUtil.click(ObjectRepo.klickAud_SubmitButton);
+		SeleniumUtil.waitForElementVisible(ObjectRepo.klickAud_DownloadButton, 5);
+		SeleniumUtil.click(ObjectRepo.klickAud_DownloadButton);
+		SeleniumUtil.waitForElementVisible(ObjectRepo.klickAud_DownloadComplete, 5);
+	}
+
+	private static void searchOnSoundcloud(String currentArtist, String currentSong) {
+		SeleniumUtil.waitForElementVisible(ObjectRepo.soundCloud_LandingPageSearchBar, 5);
+		SeleniumUtil.type(ObjectRepo.soundCloud_LandingPageSearchBar, currentArtist + " " + currentSong);
+		SeleniumUtil.click(ObjectRepo.soundCloud_LandingPageSearchButton);
+		SeleniumUtil.waitForElementVisible(ObjectRepo.getArtistSongResults(1), 5);
 	}
 
 	public static void wait(int timeInSeconds) {
