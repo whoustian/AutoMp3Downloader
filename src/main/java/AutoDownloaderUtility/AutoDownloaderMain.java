@@ -5,8 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map.Entry;
+import java.util.List;
 
 import Selenium.SeleniumUtil;
 import Selenium.SeleniumWebDriver;
@@ -21,15 +20,15 @@ public class AutoDownloaderMain {
 		String songUrl;
 		int index = 1;
 		ArrayList<String> searchResults = new ArrayList<String>();
-		String songListDirectory = "C:\\Users\\Will\\workspace\\AutoMp3Downloader\\src\\main\\resources\\SongsToDownload.txt";
-		HashMap<String, String> songs = getSongList(songListDirectory);
+		String songListDirectory = "C:\\Users\\Will\\Desktop\\SongsToDownload.txt";
+		List<Song> songs = getSongList(songListDirectory);
 
 		SeleniumWebDriver.setUp();
 
-		for (Entry<String, String> entry : songs.entrySet()) {
+		for (Song entry : songs) {
 			searchResults.clear();
-			currentArtist = entry.getKey();
-			currentSong = entry.getValue();
+			currentArtist = entry.getArtist();
+			currentSong = entry.getTitle();
 
 			SeleniumWebDriver.goToUrl("https://www.soundcloud.com");
 			searchOnSoundcloud(currentArtist, currentSong);
@@ -48,8 +47,7 @@ public class AutoDownloaderMain {
 			for (String i : searchResults) {
 				currentArtistResult = i.split("\n")[0];
 				currentSongResult = i.split("\n")[1];
-				if (currentArtistResult.equalsIgnoreCase(currentArtist)
-						&& currentSongResult.equalsIgnoreCase(currentSong)) {
+				if (checkSongMatch(currentArtist, currentSong, currentArtistResult, currentSongResult)) {
 					SeleniumUtil.click(ObjectRepo.getSongLink(index));
 					break;
 				}
@@ -64,6 +62,15 @@ public class AutoDownloaderMain {
 		}
 
 		SeleniumWebDriver.closeBrowser();
+	}
+
+	private static boolean checkSongMatch(String expectedArtist, String expectedSong, String actualArtist,
+			String actualSong) {
+		boolean artistMatch = actualArtist.toLowerCase().substring(0, expectedArtist.length())
+				.contains(expectedArtist.toLowerCase());
+		boolean songMatch = actualSong.toLowerCase().substring(0, expectedSong.length())
+				.contains(expectedSong.toLowerCase());
+		return artistMatch && songMatch;
 	}
 
 	private static void downloadSong(String songUrl) {
@@ -90,18 +97,19 @@ public class AutoDownloaderMain {
 		}
 	}
 
-	public static HashMap<String, String> getSongList(String songListDirectory) {
+	public static List<Song> getSongList(String songListDirectory) {
 		try {
 			String currentLine;
 			String artist;
 			String song;
-			HashMap<String, String> songList = new HashMap<String, String>();
+			List<Song> songList = new ArrayList<Song>();
 			File songListFile = new File(songListDirectory);
 			BufferedReader br = new BufferedReader(new FileReader(songListFile));
 			while ((currentLine = br.readLine()) != null) {
 				artist = currentLine.split(" - ")[0];
 				song = currentLine.split(" - ")[1];
-				songList.put(artist, song);
+				Song currentSong = new Song(artist, song);
+				songList.add(currentSong);
 			}
 			br.close();
 			return songList;
@@ -109,6 +117,7 @@ public class AutoDownloaderMain {
 			e.printStackTrace();
 			return null;
 		}
+
 	}
 
 }
