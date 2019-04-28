@@ -7,12 +7,40 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
+
 import Selenium.SeleniumUtil;
 import Selenium.SeleniumWebDriver;
 
 public class AutoDownloaderMain {
 
 	public static void main(String[] Args) {
+		// OpenTabs();
+		DownloadMusic();
+	}
+
+	public static void OpenTabs() {
+		String currentArtist;
+		String currentSong;
+		String songListDirectory = "C:\\Users\\Will\\Desktop\\Producing\\Downloader Tool\\SongsToDownload.txt";
+		List<Song> songs = getSongList(songListDirectory);
+		int index = 0;
+		SeleniumWebDriver.setUp();
+		ArrayList<String> tabs = new ArrayList<String>(SeleniumWebDriver.getDriver().getWindowHandles());
+		for (Song entry : songs) {
+			tabs = new ArrayList<String>(SeleniumWebDriver.getDriver().getWindowHandles());
+			currentArtist = entry.getArtist();
+			currentSong = entry.getTitle();
+			SeleniumWebDriver.goToUrl("https://www.soundcloud.com");
+			searchOnSoundcloud(currentArtist, currentSong);
+			SeleniumWebDriver.getDriver().findElement(By.cssSelector("head")).sendKeys(Keys.chord(Keys.CONTROL, "t"));
+			SeleniumWebDriver.getDriver().switchTo().window(tabs.get(index));
+			index++;
+		}
+	}
+
+	public static void DownloadMusic() {
 		String currentArtist;
 		String currentSong;
 		String currentArtistResult;
@@ -20,7 +48,7 @@ public class AutoDownloaderMain {
 		String songUrl;
 		int index = 1;
 		ArrayList<String> searchResults = new ArrayList<String>();
-		String songListDirectory = "C:\\Users\\Will\\Desktop\\SongsToDownload.txt";
+		String songListDirectory = "C:\\Users\\Will\\Desktop\\Producing\\Downloader Tool\\SongsToDownload.txt";
 		List<Song> songs = getSongList(songListDirectory);
 
 		SeleniumWebDriver.setUp();
@@ -33,14 +61,7 @@ public class AutoDownloaderMain {
 			SeleniumWebDriver.goToUrl("https://www.soundcloud.com");
 			searchOnSoundcloud(currentArtist, currentSong);
 
-			try {
-				while (index < 10) {
-					searchResults.add(SeleniumUtil.getText(ObjectRepo.getArtistSongResults(index)));
-					index++;
-				}
-			} catch (Exception e) {
-				System.out.println("All results grabbed.");
-			}
+			searchResults = grabSearchResults();
 
 			index = 1;
 
@@ -62,6 +83,20 @@ public class AutoDownloaderMain {
 		}
 
 		SeleniumWebDriver.closeBrowser();
+	}
+
+	private static ArrayList<String> grabSearchResults() {
+		int index = 1;
+		ArrayList<String> searchResults = new ArrayList<String>();
+		try {
+			while (index < 10) {
+				searchResults.add(SeleniumUtil.getText(ObjectRepo.getArtistSongResults(index)));
+				index++;
+			}
+		} catch (Exception e) {
+			System.out.println("All results grabbed.");
+		}
+		return searchResults;
 	}
 
 	private static boolean checkSongMatch(String expectedArtist, String expectedSong, String actualArtist,
