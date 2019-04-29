@@ -10,7 +10,6 @@ import java.util.List;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 
-import Selenium.SeleniumUtil;
 import Selenium.SeleniumWebDriver;
 
 public class AutoDownloaderMain {
@@ -47,6 +46,7 @@ public class AutoDownloaderMain {
 		String currentSongResult;
 		String songUrl;
 		int index = 1;
+		boolean songFound = false;
 		ArrayList<String> searchResults = new ArrayList<String>();
 		String songListDirectory = "C:\\Users\\Will\\Desktop\\Producing\\Downloader Tool\\SongsToDownload.txt";
 		List<Song> songs = getSongList(songListDirectory);
@@ -69,13 +69,20 @@ public class AutoDownloaderMain {
 				currentArtistResult = i.split("\n")[0];
 				currentSongResult = i.split("\n")[1];
 				if (checkSongMatch(currentArtist, currentSong, currentArtistResult, currentSongResult)) {
-					SeleniumUtil.click(ObjectRepo.getSongLink(index));
+					ObjectRepo.getSongLink(index).click();
+					;
+					songFound = true;
 					break;
 				}
 				index++;
 			}
 
-			SeleniumUtil.waitForElementVisible(ObjectRepo.soundCloud_FollowButton, 5);
+			if (!songFound) {
+				System.out.println("Unable to find song: " + currentSong);
+				continue;
+			}
+
+			ObjectRepo.soundCloud_FollowButton.waitForVisible(5);
 			songUrl = SeleniumWebDriver.getCurrentUrl();
 
 			SeleniumWebDriver.goToUrl("https://www.klickaud.com");
@@ -89,8 +96,8 @@ public class AutoDownloaderMain {
 		int index = 1;
 		ArrayList<String> searchResults = new ArrayList<String>();
 		try {
-			while (index < 10) {
-				searchResults.add(SeleniumUtil.getText(ObjectRepo.getArtistSongResults(index)));
+			while (index < 5) {
+				searchResults.add(ObjectRepo.getArtistSongResults(index).getText());
 				index++;
 			}
 		} catch (Exception e) {
@@ -109,19 +116,19 @@ public class AutoDownloaderMain {
 	}
 
 	private static void downloadSong(String songUrl) {
-		SeleniumUtil.waitForElementVisible(ObjectRepo.klickAud_SearchBar, 5);
-		SeleniumUtil.type(ObjectRepo.klickAud_SearchBar, songUrl);
-		SeleniumUtil.click(ObjectRepo.klickAud_SubmitButton);
-		SeleniumUtil.waitForElementVisible(ObjectRepo.klickAud_DownloadButton, 5);
-		SeleniumUtil.click(ObjectRepo.klickAud_DownloadButton);
-		SeleniumUtil.waitForElementVisible(ObjectRepo.klickAud_DownloadComplete, 5);
+		ObjectRepo.klickAud_SearchBar.waitForVisible(5);
+		ObjectRepo.klickAud_SearchBar.setValue(songUrl);
+		ObjectRepo.klickAud_SubmitButton.click();
+		ObjectRepo.klickAud_DownloadButton.waitForVisible(5);
+		ObjectRepo.klickAud_DownloadButton.click();
+		ObjectRepo.klickAud_DownloadComplete.waitForVisible(5);
 	}
 
 	private static void searchOnSoundcloud(String currentArtist, String currentSong) {
-		SeleniumUtil.waitForElementVisible(ObjectRepo.soundCloud_LandingPageSearchBar, 5);
-		SeleniumUtil.type(ObjectRepo.soundCloud_LandingPageSearchBar, currentArtist + " " + currentSong);
-		SeleniumUtil.click(ObjectRepo.soundCloud_LandingPageSearchButton);
-		SeleniumUtil.waitForElementVisible(ObjectRepo.getArtistSongResults(1), 5);
+		ObjectRepo.soundCloud_LandingPageSearchBar.waitForVisible(5);
+		ObjectRepo.soundCloud_LandingPageSearchBar.setValue(currentArtist + " " + currentSong);
+		ObjectRepo.soundCloud_LandingPageSearchButton.click();
+		ObjectRepo.getArtistSongResults(1).waitForVisible(5);
 	}
 
 	public static void wait(int timeInSeconds) {
