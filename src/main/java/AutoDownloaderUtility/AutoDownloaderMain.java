@@ -51,6 +51,7 @@ public class AutoDownloaderMain {
 				}
 				index++;
 			}
+			
 
 			if (!songFound) {
 				System.out.println("Unable to find song: " + currentSong);
