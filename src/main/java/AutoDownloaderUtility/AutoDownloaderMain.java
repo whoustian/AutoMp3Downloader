@@ -7,36 +7,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
-
 import Selenium.SeleniumWebDriver;
 
 public class AutoDownloaderMain {
 
 	public static void main(String[] Args) {
-		// OpenTabs();
 		DownloadMusic();
-	}
-
-	public static void OpenTabs() {
-		String currentArtist;
-		String currentSong;
-		String songListDirectory = "C:\\Users\\Will\\Desktop\\Producing\\Downloader Tool\\SongsToDownload.txt";
-		List<Song> songs = getSongList(songListDirectory);
-		int index = 0;
-		SeleniumWebDriver.setUp();
-		ArrayList<String> tabs = new ArrayList<String>(SeleniumWebDriver.getDriver().getWindowHandles());
-		for (Song entry : songs) {
-			tabs = new ArrayList<String>(SeleniumWebDriver.getDriver().getWindowHandles());
-			currentArtist = entry.getArtist();
-			currentSong = entry.getTitle();
-			SeleniumWebDriver.goToUrl("https://www.soundcloud.com");
-			searchOnSoundcloud(currentArtist, currentSong);
-			SeleniumWebDriver.getDriver().findElement(By.cssSelector("head")).sendKeys(Keys.chord(Keys.CONTROL, "t"));
-			SeleniumWebDriver.getDriver().switchTo().window(tabs.get(index));
-			index++;
-		}
 	}
 
 	public static void DownloadMusic() {
@@ -68,9 +44,8 @@ public class AutoDownloaderMain {
 			for (String i : searchResults) {
 				currentArtistResult = i.split("\n")[0];
 				currentSongResult = i.split("\n")[1];
-				if (checkSongMatch(currentArtist, currentSong, currentArtistResult, currentSongResult)) {
+				if (songMatches(currentArtist, currentSong, currentArtistResult, currentSongResult)) {
 					ObjectRepo.getSongLink(index).click();
-					;
 					songFound = true;
 					break;
 				}
@@ -106,29 +81,52 @@ public class AutoDownloaderMain {
 		return searchResults;
 	}
 
-	private static boolean checkSongMatch(String expectedArtist, String expectedSong, String actualArtist,
+	private static boolean songMatches(String expectedArtist, String expectedSong, String actualArtist,
 			String actualSong) {
-		boolean artistMatch = actualArtist.toLowerCase().substring(0, expectedArtist.length())
-				.contains(expectedArtist.toLowerCase());
-		boolean songMatch = actualSong.toLowerCase().substring(0, expectedSong.length())
-				.contains(expectedSong.toLowerCase());
+		int artistCharMatchCount = 0;
+		int songCharMatchCount = 0;
+		char[] artistCharArray = actualArtist.toCharArray();
+		char[] songCharArray = actualSong.toCharArray();
+
+		for (int i = 0; i < expectedArtist.length(); i++) {
+			char c = expectedArtist.charAt(i);
+			if (Character.toString(c).equalsIgnoreCase(Character.toString(artistCharArray[i]))) {
+				artistCharMatchCount++;
+			}
+		}
+
+		for (int i = 0; i < expectedSong.length(); i++) {
+			char c = expectedSong.charAt(i);
+			if (Character.toString(c).equalsIgnoreCase(Character.toString(songCharArray[i]))) {
+				songCharMatchCount++;
+			}
+		}
+
+		int totalArtistLength = artistCharArray.length;
+		int totalSongLength = songCharArray.length;
+
+		double acceptableArtistCount = totalArtistLength / 1.4;
+		double acceptableSongCount = totalSongLength / 1.4;
+
+		boolean artistMatch = artistCharMatchCount >= acceptableArtistCount;
+		boolean songMatch = songCharMatchCount >= acceptableSongCount;
 		return artistMatch && songMatch;
 	}
 
 	private static void downloadSong(String songUrl) {
-		ObjectRepo.klickAud_SearchBar.waitForVisible(5);
+		ObjectRepo.klickAud_SearchBar.waitForVisible(60);
 		ObjectRepo.klickAud_SearchBar.setValue(songUrl);
 		ObjectRepo.klickAud_SubmitButton.click();
-		ObjectRepo.klickAud_DownloadButton.waitForVisible(5);
+		ObjectRepo.klickAud_DownloadButton.waitForVisible(60);
 		ObjectRepo.klickAud_DownloadButton.click();
 		ObjectRepo.klickAud_DownloadComplete.waitForVisible(5);
 	}
 
 	private static void searchOnSoundcloud(String currentArtist, String currentSong) {
-		ObjectRepo.soundCloud_LandingPageSearchBar.waitForVisible(5);
+		ObjectRepo.soundCloud_LandingPageSearchBar.waitForVisible(60);
 		ObjectRepo.soundCloud_LandingPageSearchBar.setValue(currentArtist + " " + currentSong);
 		ObjectRepo.soundCloud_LandingPageSearchButton.click();
-		ObjectRepo.getArtistSongResults(1).waitForVisible(5);
+		ObjectRepo.getArtistSongResults(1).waitForVisible(60);
 	}
 
 	public static void wait(int timeInSeconds) {
@@ -147,11 +145,18 @@ public class AutoDownloaderMain {
 			List<Song> songList = new ArrayList<Song>();
 			File songListFile = new File(songListDirectory);
 			BufferedReader br = new BufferedReader(new FileReader(songListFile));
-			while ((currentLine = br.readLine()) != null) {
-				artist = currentLine.split(" - ")[0];
-				song = currentLine.split(" - ")[1];
-				Song currentSong = new Song(artist, song);
-				songList.add(currentSong);
+			try {
+				while ((currentLine = br.readLine()) != null) {
+					artist = currentLine.split(" - ", 2)[0];
+					song = currentLine.split(" - ", 2)[1];
+					Song currentSong = new Song(artist, song);
+					songList.add(currentSong);
+				}
+			} catch (Exception e) {
+				System.out.println("Got all songs.");
+			}
+			for (Song i : songList) {
+				System.out.println(i.getTitle());
 			}
 			br.close();
 			return songList;
