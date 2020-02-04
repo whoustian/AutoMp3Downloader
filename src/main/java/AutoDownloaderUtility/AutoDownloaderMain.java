@@ -61,7 +61,7 @@ public class AutoDownloaderMain {
 			ObjectRepo.soundCloud_FollowButton.waitForVisible(5);
 			songUrl = SeleniumWebDriver.getCurrentUrl();
 
-			SeleniumWebDriver.goToUrl("https://www.klickaud.com");
+			SeleniumWebDriver.goToUrl("https://www.scddlr.com/");
 			downloadSong(songUrl);
 		}
 
@@ -115,12 +115,12 @@ public class AutoDownloaderMain {
 	}
 
 	private static void downloadSong(String songUrl) {
-		ObjectRepo.klickAud_SearchBar.waitForVisible(60);
-		ObjectRepo.klickAud_SearchBar.setValue(songUrl);
-		ObjectRepo.klickAud_SubmitButton.click();
-		ObjectRepo.klickAud_DownloadButton.waitForVisible(60);
-		ObjectRepo.klickAud_DownloadButton.click();
-		ObjectRepo.klickAud_DownloadComplete.waitForVisible(5);
+		ObjectRepo.scDlr_SearchBar.waitForVisible(60);
+		ObjectRepo.scDlr_SearchBar.setValue(songUrl);
+		ObjectRepo.scDlr_SubmitButton.click();
+		ObjectRepo.scDlr_DownloadButton.waitForVisible(60);
+		ObjectRepo.scDlr_DownloadButton.click();
+		ObjectRepo.scDlr_DownloadComplete.waitForVisible(5);
 	}
 
 	private static void searchOnSoundcloud(String currentArtist, String currentSong) {
@@ -148,8 +148,8 @@ public class AutoDownloaderMain {
 			BufferedReader br = new BufferedReader(new FileReader(songListFile));
 			try {
 				while ((currentLine = br.readLine()) != null) {
-					artist = currentLine.split(" - ", 2)[0];
-					song = currentLine.split(" - ", 2)[1];
+					artist = currentLine.split("%")[0].trim();
+					song = currentLine.split("%")[1].trim();
 					Song currentSong = new Song(artist, song);
 					songList.add(currentSong);
 				}
