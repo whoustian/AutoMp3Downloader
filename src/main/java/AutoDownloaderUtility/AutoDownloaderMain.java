@@ -24,7 +24,7 @@ public class AutoDownloaderMain {
 		int index = 1;
 		boolean songFound = false;
 		ArrayList<String> searchResults = new ArrayList<String>();
-		String songListDirectory = "C:\\Users\\Will\\Desktop\\Producing\\Downloader Tool\\SongsToDownload.txt";
+		String songListDirectory = "C:\\SoundCloudDownloader\\SongList.txt";
 		List<Song> songs = getSongList(songListDirectory);
 
 		SeleniumWebDriver.setUp();
@@ -51,7 +51,6 @@ public class AutoDownloaderMain {
 				}
 				index++;
 			}
-			
 
 			if (!songFound) {
 				System.out.println("Unable to find song: " + currentSong);
