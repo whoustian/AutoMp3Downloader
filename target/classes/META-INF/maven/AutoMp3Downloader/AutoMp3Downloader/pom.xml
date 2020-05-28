@@ -7,11 +7,9 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>Selenium</groupId>
-			<artifactId>Selenium</artifactId>
-			<version>1.0</version>
-			<scope>system</scope>
-			<systemPath>C:\SoundcloudDownloader\Dependencies\Selenium-0.0.1-SNAPSHOT-jar-with-dependencies.jar</systemPath>
+			<groupId>org.seleniumhq.selenium</groupId>
+			<artifactId>selenium-java</artifactId>
+			<version>3.14.0</version>
 		</dependency>
 	</dependencies>
 

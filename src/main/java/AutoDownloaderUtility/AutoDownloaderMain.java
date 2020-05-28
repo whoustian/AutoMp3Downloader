@@ -7,15 +7,23 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.openqa.selenium.chrome.ChromeDriver;
+
 import Selenium.SeleniumWebDriver;
 
 public class AutoDownloaderMain {
 
+	public static ChromeDriver driver;
+
 	public static void main(String[] Args) {
-		DownloadMusic();
+		try {
+			DownloadMusic();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
-	public static void DownloadMusic() {
+	public static void DownloadMusic() throws IOException {
 		String currentArtist;
 		String currentSong;
 		String currentArtistResult;
@@ -24,17 +32,22 @@ public class AutoDownloaderMain {
 		int index = 1;
 		boolean songFound = false;
 		ArrayList<String> searchResults = new ArrayList<String>();
-		String songListDirectory = "C:\\SoundCloudDownloader\\SongList.txt";
+		String songListDirectory = getSongListDirectory();
 		List<Song> songs = getSongList(songListDirectory);
 
-		SeleniumWebDriver.setUp();
+		try {
+			driver = SeleniumWebDriver.setUp("C:\\SoundCloudDownloader\\Dependencies\\chromedriver.exe");
+			driver.manage().window().maximize();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
 		for (Song entry : songs) {
 			searchResults.clear();
 			currentArtist = entry.getArtist();
 			currentSong = entry.getTitle();
 
-			SeleniumWebDriver.goToUrl("https://www.soundcloud.com");
+			driver.get("https://www.soundcloud.com");
 			searchOnSoundcloud(currentArtist, currentSong);
 
 			searchResults = grabSearchResults();
@@ -45,7 +58,7 @@ public class AutoDownloaderMain {
 				currentArtistResult = i.split("\n")[0];
 				currentSongResult = i.split("\n")[1];
 				if (songMatches(currentArtist, currentSong, currentArtistResult, currentSongResult)) {
-					ObjectRepo.getSongLink(index).click();
+					ObjectRepo.getSongLink(index).click(driver);
 					songFound = true;
 					break;
 				}
@@ -57,14 +70,14 @@ public class AutoDownloaderMain {
 				continue;
 			}
 
-			ObjectRepo.soundCloud_FollowButton.waitForVisible(5);
-			songUrl = SeleniumWebDriver.getCurrentUrl();
+			ObjectRepo.soundCloud_FollowButton.waitForVisible(driver, 5);
+			songUrl = driver.getCurrentUrl();
 
-			SeleniumWebDriver.goToUrl("https://www.scddlr.com/");
+			driver.get("https://www.scddlr.com/");
 			downloadSong(songUrl);
 		}
 
-		SeleniumWebDriver.closeBrowser();
+		driver.quit();
 	}
 
 	private static ArrayList<String> grabSearchResults() {
@@ -72,7 +85,7 @@ public class AutoDownloaderMain {
 		ArrayList<String> searchResults = new ArrayList<String>();
 		try {
 			while (index < 5) {
-				searchResults.add(ObjectRepo.getArtistSongResults(index).getText());
+				searchResults.add(ObjectRepo.getArtistSongResults(index).getText(driver));
 				index++;
 			}
 		} catch (Exception e) {
@@ -114,19 +127,19 @@ public class AutoDownloaderMain {
 	}
 
 	private static void downloadSong(String songUrl) {
-		ObjectRepo.scDlr_SearchBar.waitForVisible(60);
-		ObjectRepo.scDlr_SearchBar.setValue(songUrl);
-		ObjectRepo.scDlr_SubmitButton.click();
-		ObjectRepo.scDlr_DownloadButton.waitForVisible(60);
-		ObjectRepo.scDlr_DownloadButton.click();
-		ObjectRepo.scDlr_DownloadComplete.waitForVisible(5);
+		ObjectRepo.scDlr_SearchBar.waitForVisible(driver, 60);
+		ObjectRepo.scDlr_SearchBar.setValue(driver, songUrl);
+		ObjectRepo.scDlr_SubmitButton.click(driver);
+		ObjectRepo.scDlr_DownloadButton.waitForVisible(driver, 60);
+		ObjectRepo.scDlr_DownloadButton.click(driver);
+		ObjectRepo.scDlr_DownloadComplete.waitForVisible(driver, 5);
 	}
 
 	private static void searchOnSoundcloud(String currentArtist, String currentSong) {
-		ObjectRepo.soundCloud_LandingPageSearchBar.waitForVisible(60);
-		ObjectRepo.soundCloud_LandingPageSearchBar.setValue(currentArtist + " " + currentSong);
-		ObjectRepo.soundCloud_LandingPageSearchButton.click();
-		ObjectRepo.getArtistSongResults(1).waitForVisible(60);
+		ObjectRepo.soundCloud_LandingPageSearchBar.waitForVisible(driver, 60);
+		ObjectRepo.soundCloud_LandingPageSearchBar.setValue(driver, currentArtist + " " + currentSong);
+		ObjectRepo.soundCloud_LandingPageSearchButton.click(driver);
+		ObjectRepo.getArtistSongResults(1).waitForVisible(driver, 60);
 	}
 
 	public static void wait(int timeInSeconds) {
@@ -165,6 +178,23 @@ public class AutoDownloaderMain {
 			return null;
 		}
 
+	}
+
+	public static String getSongListDirectory() throws IOException {
+		BufferedReader br = new BufferedReader(
+				new FileReader(new File("C:\\SoundCloudDownloader\\config\\SongListDirectory.txt")));
+		String dir = br.readLine();
+		br.close();
+
+		if (dir.contains("/")) {
+			dir = dir.replaceAll("/", "\\\\");
+		}
+
+		if (!dir.endsWith("\\")) {
+			dir = dir + "\\";
+		}
+
+		return dir;
 	}
 
 }
