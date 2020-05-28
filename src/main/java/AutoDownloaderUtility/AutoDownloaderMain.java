@@ -190,8 +190,8 @@ public class AutoDownloaderMain {
 			dir = dir.replaceAll("/", "\\\\");
 		}
 
-		if (!dir.endsWith("\\")) {
-			dir = dir + "\\";
+		if (!dir.endsWith("\\SongList.txt")) {
+			dir = dir + "\\SongList.txt";
 		}
 
 		return dir;
