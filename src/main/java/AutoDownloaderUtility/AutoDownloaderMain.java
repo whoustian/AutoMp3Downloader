@@ -36,7 +36,7 @@ public class AutoDownloaderMain {
 		List<Song> songs = getSongList(songListDirectory);
 
 		try {
-			driver = SeleniumWebDriver.setUp("C:\\SoundCloudDownloader\\Dependencies\\chromedriver.exe");
+			driver = SeleniumWebDriver.setUp("C:\\SoundCloudDownloader\\dependencies\\chromedriver.exe");
 			driver.manage().window().maximize();
 		} catch (Exception e) {
 			e.printStackTrace();
