@@ -143,7 +143,7 @@ public class AutoDownloaderMain {
 
 		ObjectRepo.scDlr_DownloadButton.waitForVisible(driver, 10);
 		ObjectRepo.scDlr_DownloadButton.click(driver);
-		Thread.sleep(1000);
+		Thread.sleep(3000);
 	}
 
 	private static void searchOnSoundcloud(String currentArtist, String currentSong) {
