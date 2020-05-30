@@ -18,12 +18,12 @@ public class AutoDownloaderMain {
 	public static void main(String[] Args) {
 		try {
 			DownloadMusic();
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	public static void DownloadMusic() throws IOException {
+	public static void DownloadMusic() throws IOException, InterruptedException {
 		String currentArtist;
 		String currentSong;
 		String currentArtistResult;
@@ -73,7 +73,7 @@ public class AutoDownloaderMain {
 			ObjectRepo.soundCloud_FollowButton.waitForVisible(driver, 5);
 			songUrl = driver.getCurrentUrl();
 
-			driver.get("https://www.scddlr.com/");
+			driver.get("https://sclouddownloader.net/");
 			downloadSong(songUrl);
 		}
 
@@ -126,13 +126,24 @@ public class AutoDownloaderMain {
 		return artistMatch && songMatch;
 	}
 
-	private static void downloadSong(String songUrl) {
-		ObjectRepo.scDlr_SearchBar.waitForVisible(driver, 60);
-		ObjectRepo.scDlr_SearchBar.setValue(driver, songUrl);
+	private static void downloadSong(String songUrl) throws InterruptedException {
+		ObjectRepo.scDlr_SearchBar.waitForVisible(driver, 10);
+		ObjectRepo.scDlr_SearchBar.setValue(driver, songUrl.trim());
 		ObjectRepo.scDlr_SubmitButton.click(driver);
-		ObjectRepo.scDlr_DownloadButton.waitForVisible(driver, 60);
+		Thread.sleep(1000);
+
+		if (ObjectRepo.scDlr_ErrorMsg.isVisible(driver)) {
+			int count = 0;
+			while (ObjectRepo.scDlr_ErrorMsg.isVisible(driver) && count < 10) {
+				ObjectRepo.scDlr_SearchBar.setValue(driver, songUrl.trim());
+				ObjectRepo.scDlr_SubmitButton.click(driver);
+				count++;
+			}
+		}
+
+		ObjectRepo.scDlr_DownloadButton.waitForVisible(driver, 10);
 		ObjectRepo.scDlr_DownloadButton.click(driver);
-		ObjectRepo.scDlr_DownloadComplete.waitForVisible(driver, 5);
+		Thread.sleep(1000);
 	}
 
 	private static void searchOnSoundcloud(String currentArtist, String currentSong) {

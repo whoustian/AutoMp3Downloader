@@ -62,8 +62,12 @@ public class PageObject {
 		}
 	}
 
-	public void isVisible(WebDriver driver) {
-		driver.findElement(locator).isDisplayed();
+	public boolean isVisible(WebDriver driver) {
+		try {
+			return driver.findElement(locator).isDisplayed();
+		} catch (Exception e) {
+			return false;
+		}
 	}
 
 }
