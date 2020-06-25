@@ -25,7 +25,7 @@ public class SeleniumWebDriver {
 
 	public static String getDlDirectory() throws IOException {
 		BufferedReader br = new BufferedReader(
-				new FileReader(new File("C:\\SoundCloudDownloader\\config\\DownloadDirectory.txt")));
+				new FileReader(new File("C:\\PlaylistDownloader\\config\\DownloadDirectory.txt")));
 		String dir = br.readLine();
 		br.close();
 

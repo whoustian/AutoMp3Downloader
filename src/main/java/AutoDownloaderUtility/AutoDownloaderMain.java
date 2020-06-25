@@ -7,23 +7,94 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 
+import Selenium.PageObject;
 import Selenium.SeleniumWebDriver;
 
 public class AutoDownloaderMain {
 
-	public static ChromeDriver driver;
+	public static WebDriver driver;
+	public static final String SCLOUDDOWNLOADER = "sCloudDownloader";
+	public static final String KLICKAUD = "klickAud";
+
+	public static final String downloadWebsite = KLICKAUD;
 
 	public static void main(String[] Args) {
 		try {
-			DownloadMusic();
+			DownloadPlaylist();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	public static void DownloadMusic() throws IOException, InterruptedException {
+	public static void DownloadPlaylist() throws IOException, InterruptedException {
+		String plLink = getPlaylistLink();
+		int plSize = 1;
+		WebElement link;
+
+		driver = SeleniumWebDriver.setUp("C:\\SoundCloudDownloader\\dependencies\\chromedriver.exe");
+		driver.manage().window().maximize();
+
+		driver.get(plLink);
+
+		while (!ObjectRepo.soundCloud_BottomBorder.isVisible(driver)) {
+			JavascriptExecutor js = ((JavascriptExecutor) driver);
+			js.executeScript("window.scrollTo(0, document.body.scrollHeight)");
+			Thread.sleep(1000);
+		}
+
+		for (int count = 1; count < 5000; count++) {
+			PageObject songCount = ObjectRepo.getCurrentScPlaylistSong(count);
+			if (!songCount.isVisible(driver)) {
+				plSize = count - 1;
+				break;
+			}
+		}
+
+		for (int i = 1; i <= plSize; i++) {
+			ObjectRepo.soundCloud_FollowButton.waitForVisible(driver, 5);
+			PageObject currentObject = ObjectRepo.getCurrentScPlaylistSong(i);
+			while (!currentObject.isVisible(driver)) {
+				JavascriptExecutor js = ((JavascriptExecutor) driver);
+				js.executeScript("window.scrollTo(0, document.body.scrollHeight)");
+				Thread.sleep(1000);
+			}
+			link = driver.findElement(currentObject.getLocator());
+			String linkLocation = link.getAttribute("href");
+			downloadSong(linkLocation, downloadWebsite);
+			driver.get(plLink);
+		}
+
+		System.out.println("Playlist downloaded!");
+
+		driver.close();
+
+	}
+
+	public static String getPlaylistLink() throws IOException {
+		String plLink = "";
+		File playlistFile = new File("C:\\PlaylistDownloader\\PlaylistLink.txt");
+		BufferedReader br = new BufferedReader(new FileReader(playlistFile));
+		try {
+			StringBuilder sb = new StringBuilder();
+			String line = br.readLine();
+
+			while (line != null) {
+				sb.append(line);
+				sb.append(System.lineSeparator());
+				line = br.readLine();
+			}
+			plLink = sb.toString();
+		} finally {
+			br.close();
+		}
+		return plLink;
+	}
+
+	public static void DownloadMusic(String dlSite) throws IOException, InterruptedException {
 		String currentArtist;
 		String currentSong;
 		String currentArtistResult;
@@ -73,8 +144,7 @@ public class AutoDownloaderMain {
 			ObjectRepo.soundCloud_FollowButton.waitForVisible(driver, 5);
 			songUrl = driver.getCurrentUrl();
 
-			driver.get("https://sclouddownloader.net/");
-			downloadSong(songUrl);
+			downloadSong(songUrl, dlSite);
 		}
 
 		driver.quit();
@@ -126,8 +196,28 @@ public class AutoDownloaderMain {
 		return artistMatch && songMatch;
 	}
 
-	private static void downloadSong(String songUrl) throws InterruptedException {
-		ObjectRepo.scDlr_SearchBar.waitForVisible(driver, 10);
+	private static void downloadSong(String songUrl, String dlSite) throws InterruptedException {
+		if (dlSite.equalsIgnoreCase(SCLOUDDOWNLOADER)) {
+			sCloudDownloader(songUrl);
+		} else if (dlSite.equalsIgnoreCase(KLICKAUD)) {
+			klickAud(songUrl);
+		}
+
+	}
+
+	private static void klickAud(String songUrl) throws InterruptedException {
+		driver.get("https://www.klickaud.co/");
+		ObjectRepo.klickAud_SearchBar.setValue(driver, songUrl.trim());
+		ObjectRepo.klickAud_SubmitButton.click(driver);
+		ObjectRepo.klickAud_DownloadButton.waitForVisible(driver, 120);
+		Thread.sleep(1000);
+		ObjectRepo.klickAud_DownloadButton.click(driver);
+		Thread.sleep(2000);
+	}
+
+	private static void sCloudDownloader(String songUrl) throws InterruptedException {
+		driver.get("https://sclouddownloader.net/");
+		ObjectRepo.scDlr_SearchBar.waitForVisible(driver, 120);
 		ObjectRepo.scDlr_SearchBar.setValue(driver, songUrl.trim());
 		ObjectRepo.scDlr_SubmitButton.click(driver);
 		Thread.sleep(1000);
@@ -141,7 +231,7 @@ public class AutoDownloaderMain {
 			}
 		}
 
-		ObjectRepo.scDlr_DownloadButton.waitForVisible(driver, 10);
+		ObjectRepo.scDlr_DownloadButton.waitForVisible(driver, 120);
 		ObjectRepo.scDlr_DownloadButton.click(driver);
 		Thread.sleep(3000);
 	}

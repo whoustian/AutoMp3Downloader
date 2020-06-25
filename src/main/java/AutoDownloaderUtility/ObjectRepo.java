@@ -12,6 +12,9 @@ public class ObjectRepo {
 			By.xpath("(//*[@type='submit'])[2]"), "");
 	public static final PageObject soundCloud_FollowButton = new PageObject(
 			By.xpath("//*[@type='button' and @title='Follow']"), "");
+	public static final PageObject soundCloud_BottomBorder = new PageObject(
+			By.xpath("//*[@class='paging-eof sc-border-light-top']"), "");
+
 	public static final PageObject klickAud_SearchBar = new PageObject(
 			By.xpath("//*[@title='Enter The SoundCloud URL']"), "");
 	public static final PageObject klickAud_SubmitButton = new PageObject(By.xpath("//*[@type='submit']"), "");
@@ -34,6 +37,12 @@ public class ObjectRepo {
 	public static PageObject getSongLink(int index) {
 		return new PageObject(
 				By.xpath("(//*[@class='soundTitle__title sc-link-dark'])" + "[" + String.valueOf(index) + "]"), "");
+	}
+
+	public static PageObject getCurrentScPlaylistSong(int plIndex) {
+		PageObject scPlaylist = new PageObject(
+				By.xpath("(//*[@class='trackItem__trackTitle sc-link-dark sc-font-light'])[" + plIndex + "]"), "");
+		return scPlaylist;
 	}
 
 }
