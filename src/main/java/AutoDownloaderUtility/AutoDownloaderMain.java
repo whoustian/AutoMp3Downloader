@@ -35,7 +35,7 @@ public class AutoDownloaderMain {
 		int plSize = 1;
 		WebElement link;
 
-		driver = SeleniumWebDriver.setUp("C:\\SoundCloudDownloader\\dependencies\\chromedriver.exe");
+		driver = SeleniumWebDriver.setUp("C:\\Skipr\\dependencies\\chromedriver.exe");
 		driver.manage().window().maximize();
 
 		driver.get(plLink);
@@ -76,7 +76,7 @@ public class AutoDownloaderMain {
 
 	public static String getPlaylistLink() throws IOException {
 		String plLink = "";
-		File playlistFile = new File("C:\\PlaylistDownloader\\PlaylistLink.txt");
+		File playlistFile = new File("C:\\Skipr\\PlaylistLink.txt");
 		BufferedReader br = new BufferedReader(new FileReader(playlistFile));
 		try {
 			StringBuilder sb = new StringBuilder();
@@ -107,7 +107,7 @@ public class AutoDownloaderMain {
 		List<Song> songs = getSongList(songListDirectory);
 
 		try {
-			driver = SeleniumWebDriver.setUp("C:\\SoundCloudDownloader\\dependencies\\chromedriver.exe");
+			driver = SeleniumWebDriver.setUp("C:\\Skipr\\dependencies\\chromedriver.exe");
 			driver.manage().window().maximize();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -283,7 +283,7 @@ public class AutoDownloaderMain {
 
 	public static String getSongListDirectory() throws IOException {
 		BufferedReader br = new BufferedReader(
-				new FileReader(new File("C:\\SoundCloudDownloader\\config\\SongListDirectory.txt")));
+				new FileReader(new File("C:\\Skipr\\config\\SongListDirectory.txt")));
 		String dir = br.readLine();
 		br.close();
 
